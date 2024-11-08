@@ -1,0 +1,3 @@
+import styled from 'styled-components';
+
+// ... 스타일 코드는 동일 ... 
