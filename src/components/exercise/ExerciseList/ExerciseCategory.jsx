@@ -27,30 +27,13 @@ const ExerciseCategory = ({
   showAddForm,
   onHideAddForm
 }) => {
-  const [isAddingExercise, setIsAddingExercise] = useState(false);
   const [newExerciseName, setNewExerciseName] = useState('');
-
-  const handleAddClick = () => {
-    setIsAddingExercise(true);
-  };
-
-  const handleCancel = () => {
-    setIsAddingExercise(false);
-    setNewExerciseName('');
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (newExerciseName.trim()) {
       onAddExercise(category, newExerciseName.trim());
       setNewExerciseName('');
-      setIsAddingExercise(false);
-    }
-  };
-
-  const handleExerciseClick = (e, exercise) => {
-    if (!e.target.closest('.delete-button')) {
-      onExerciseToggle(exercise);
     }
   };
 
@@ -61,7 +44,7 @@ const ExerciseCategory = ({
           <CategoryTitle>{category}</CategoryTitle>
           <IconButton 
             size="small"
-            onClick={handleAddClick}
+            onClick={() => onShowAddForm(category)}
             sx={{
               width: '20px',
               height: '20px',
@@ -79,42 +62,20 @@ const ExerciseCategory = ({
         </TitleWrapper>
       </CategoryHeader>
 
-      {isAddingExercise && (
-        <AddExerciseFormWrapper>
-          <form onSubmit={handleSubmit}>
-            <ExerciseInput
-              type="text"
-              value={newExerciseName}
-              onChange={(e) => setNewExerciseName(e.target.value)}
-              placeholder="운동명을 입력하세요"
-              autoFocus
-            />
-            <ButtonContainer>
-              <CancelButton type="button" onClick={handleCancel}>
-                취소
-              </CancelButton>
-              <CancelButton type="submit" className="submit">
-                추가
-              </CancelButton>
-            </ButtonContainer>
-          </form>
-        </AddExerciseFormWrapper>
-      )}
-
       <CategoryExerciseList>
-        {exercises.map((exercise, index) => (
+        {exercises.map((exercise) => (
           <ExerciseItemContainer 
-            key={index}
-            onClick={(e) => handleExerciseClick(e, exercise)}
-            className={selectedExercises.includes(exercise) ? 'selected' : ''}
+            key={exercise.id}
+            selected={selectedExercises.includes(exercise.name)}
+            onClick={() => onExerciseToggle(exercise.name)}
           >
-            <ExerciseItemText>{exercise}</ExerciseItemText>
+            <ExerciseItemText>{exercise.name}</ExerciseItemText>
             <IconButton
               className="delete-button"
               size="small"
               onClick={(e) => {
                 e.stopPropagation();
-                onRemoveExercise(category, exercise);
+                onRemoveExercise(category, exercise.id);
               }}
               sx={{
                 padding: '4px',
@@ -130,6 +91,28 @@ const ExerciseCategory = ({
           </ExerciseItemContainer>
         ))}
       </CategoryExerciseList>
+
+      {showAddForm && (
+        <AddExerciseFormWrapper>
+          <form onSubmit={handleSubmit}>
+            <ExerciseInput
+              type="text"
+              value={newExerciseName}
+              onChange={(e) => setNewExerciseName(e.target.value)}
+              placeholder="운동명을 입력하세요"
+              autoFocus
+            />
+            <ButtonContainer>
+              <CancelButton type="button" onClick={onHideAddForm}>
+                취소
+              </CancelButton>
+              <CancelButton type="submit" className="submit">
+                추가
+              </CancelButton>
+            </ButtonContainer>
+          </form>
+        </AddExerciseFormWrapper>
+      )}
     </CategorySection>
   );
 };

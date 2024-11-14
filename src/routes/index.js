@@ -9,7 +9,6 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route exact path="/" element={<ExerciseListPage />} />
-      <Route path="/exercise-list" element={<ExerciseListPage />} />
       <Route path="/student-select" element={<StudentSelectPage />} />
       <Route path="/exercise-detail" element={<ExerciseDetailPage />} />
       <Route path="/exercise-chart" element={<ExerciseChartPage />} />

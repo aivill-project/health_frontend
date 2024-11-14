@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { fetchExercises, addExercise, removeExercise } from '../../../services/exerciseService';
 import ExerciseCategory from '../../../components/exercise/ExerciseList/ExerciseCategory';
 import SelectedExerciseList from '../../../components/exercise/ExerciseList/SelectedExerciseList';
 import NextButton from '../../../components/exercise/ExerciseList/NextButton';
@@ -9,73 +11,54 @@ import {
   CategorySection,
 } from '../../../components/exercise/ExerciseList/ExerciseList.styles';
 
-const exerciseCategories = {
-  '심폐지구력': [
-      '10m왕복오래달리기',
-      '15m왕복오래달리기',
-      '팝스왕복오래달리기(초등15m, 중고등20m)',
-      '오래달리기걷기(초등1000m, 중고 여1200m, 중고 남1600m)',
-      '스텝검사'
-    ],
-    '근력': [
-      '약력검사',
-      '배근력'
-    ],
-    '근지구력': [
-      '윗몸일으키기',
-      '윗몸말아올리기',
-      '팔굽혀펴기',
-      'V자앉기'
-    ],
-    '유연성': [
-      '앉아윗몸앞으로굽히기'
-    ],
-    '평형성': [
-      '한발로중심잡기'
-    ],
-    '순발력': [
-      '제자리멀리뛰기',
-      '제자리높이뛰기',
-      '50m 달리기'
-    ],
-    '민첩성': [
-      '5m 왕복달리기',
-      '7m 왕복달리기',
-      '10m 왕복달리기',
-      '스피드줄넘기',
-      '스피드발차기(제미타)'
-    ] 
-};
-
 const ExerciseListPage = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [selectedExercises, setSelectedExercises] = useState([]);
+  const [activeAddFormCategory, setActiveAddFormCategory] = useState(null);
 
-  const defaultSelectedExercises = [
-    '10m왕복오래달리기',
-    '배근력',
-    '윗몸일으키기',
-    '팔굽혀펴기',
-    '앉아윗몸앞으로굽히기',
-    '한발로중심잡기',
-    '제자리멀리뛰기',
-    '스피드줄넘기'
-  ];
+  // 운동 목록 조회
+  const { data: exerciseList, isLoading, error } = useQuery({
+    queryKey: ['exercises'],
+    queryFn: fetchExercises,
+    staleTime: 0, // 항상 최신 데이터 사용
+    cacheTime: 0  // 캐시 사용하지 않음
+  });
 
-  const [selectedExercises, setSelectedExercises] = useState(defaultSelectedExercises);
-  const [exerciseList, setExerciseList] = useState(exerciseCategories);
-  const [showAddForm, setShowAddForm] = useState(false);
+  // 운동 추가 mutation
+  const addExerciseMutation = useMutation({
+    mutationFn: ({ category, name }) => addExercise(category, name),
+    onSuccess: () => {
+      // 운동 추가 성공 시 목록 갱신
+      queryClient.invalidateQueries(['exercises']);
+      setActiveAddFormCategory(null);
+    },
+    onError: (error) => {
+      console.error('운동 추가 실패:', error);
+      alert('운동 추가에 실패했습니다.');
+    }
+  });
 
-  const handleExerciseToggle = (exercise) => {
+  // 운동 삭제 mutation
+  const removeExerciseMutation = useMutation({
+    mutationFn: (name) => removeExercise(name),
+    onSuccess: () => {
+      // 운동 삭제 성공 시 목록 갱신
+      queryClient.invalidateQueries(['exercises']);
+    }
+  });
+
+  const handleExerciseToggle = (exerciseName) => {
     setSelectedExercises(prev => {
-      if (prev.includes(exercise)) {
-        return prev.filter(item => item !== exercise);
+      if (prev.includes(exerciseName)) {
+        return prev.filter(name => name !== exerciseName);
       }
-      return [...prev, exercise];
+      return [...prev, exerciseName];
     });
   };
 
-  const handleRemoveExercise = (exercise) => {
-    setSelectedExercises(prev => prev.filter(item => item !== exercise));
+  const handleRemoveExercise = (exerciseName) => {
+    setSelectedExercises(prev => prev.filter(name => name !== exerciseName));
   };
 
   const handleNext = () => {
@@ -91,30 +74,46 @@ const ExerciseListPage = () => {
     });
   };
 
-  const handleShowAddForm = () => {
-    setShowAddForm(true);
+  const handleShowAddForm = (category) => {
+    setActiveAddFormCategory(category);
   };
 
   const handleHideAddForm = () => {
-    setShowAddForm(false);
+    setActiveAddFormCategory(null);
   };
 
-  const handleAddExercise = (category, newExercise) => {
-    setExerciseList(prev => ({
-      ...prev,
-      [category]: [...prev[category], newExercise]
-    }));
+  const handleAddExercise = (category, newName) => {
+    if (!newName.trim()) {
+      alert('운동 이름을 입력해주세요.');
+      return;
+    }
+
+    console.log('운동 추가 시도:', { category, name: newName });
+    
+    addExerciseMutation.mutate({ 
+      category, 
+      name: newName.trim() 
+    }, {
+      onSuccess: () => {
+        handleHideAddForm();
+      }
+    });
   };
 
-  const handleRemoveCategoryExercise = (category, exercise) => {
-    setExerciseList(prev => ({
-      ...prev,
-      [category]: prev[category].filter(item => item !== exercise)
-    }));
-    if (selectedExercises.includes(exercise)) {
-      handleRemoveExercise(exercise);
+  const handleRemoveCategoryExercise = (category, exerciseId) => {
+    removeExerciseMutation.mutate(exerciseId);
+    // exerciseId에 해당하는 운동의 이름을 찾아서 선택 목록에서도 제거
+    const exercise = exerciseList[category]?.find(e => e.id === exerciseId);
+    if (exercise && selectedExercises.includes(exercise.name)) {
+      handleRemoveExercise(exercise.name);
     }
   };
+
+  // 데이터 구조 확인을 위한 로그
+  console.log('Exercise List Data:', exerciseList);
+
+  if (isLoading) return <div>로딩 중...</div>;
+  if (error) return <div>에러가 발생했습니다: {error.message}</div>;
 
   return (
     <>
@@ -126,7 +125,7 @@ const ExerciseListPage = () => {
         />
 
         <CategorySection>
-          {Object.entries(exerciseList).map(([category, exercises]) => (
+          {exerciseList && Object.entries(exerciseList).map(([category, exercises]) => (
             <ExerciseCategory
               key={category}
               category={category}
@@ -134,7 +133,7 @@ const ExerciseListPage = () => {
               selectedExercises={selectedExercises}
               onExerciseToggle={handleExerciseToggle}
               onShowAddForm={handleShowAddForm}
-              showAddForm={showAddForm}
+              showAddForm={activeAddFormCategory === category}
               onHideAddForm={handleHideAddForm}
               onAddExercise={handleAddExercise}
               onRemoveExercise={handleRemoveCategoryExercise}

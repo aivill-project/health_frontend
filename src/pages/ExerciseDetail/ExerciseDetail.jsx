@@ -23,4 +23,4 @@ const ExerciseDetail = () => {
   );
 };
 
-export default ExerciseDetail; 
+export default ExerciseDetail;
