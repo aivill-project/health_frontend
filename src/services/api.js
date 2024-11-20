@@ -1,12 +1,9 @@
 import axios from 'axios';
 
-// axios 인스턴스 생성
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api', // 백엔드 서버 주소
-  timeout: 10000, // 요청 타임아웃 10초
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+  withCredentials: true,
+  timeout: 10000
 });
 
 // 요청 인터셉터 추가
