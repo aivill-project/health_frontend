@@ -37,11 +37,16 @@ import AddIcon from '@mui/icons-material/Add';
 const ExerciseDetailPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { selectedStudent, selectedExercises = [] } = location.state || {};
+  const { selectedStudent, selectedExercises } = location.state || {};
   const [selectedExercise, setSelectedExercise] = useState('');
   const [exerciseOrder, setExerciseOrder] = useState('');
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [exercises, setExercises] = useState([]);
+
+  console.log('Received data:', {
+    student: selectedStudent,
+    exercises: selectedExercises
+  });
 
   // 날짜를 yyyy-MM-dd 형식으로 변환하는 함수
   const formatDate = (date) => {
@@ -61,21 +66,17 @@ const ExerciseDetailPage = () => {
   };
 
   const [exerciseCount, setExerciseCount] = useState('1');
-  const [maxExerciseCount, setMaxExerciseCount] = useState(5);
+  const [maxExerciseCount, setMaxExerciseCount] = useState(1);
   
-  // 초기 상태를 빈 문자열로 설정
-  const [savedExerciseCounts, setSavedExerciseCounts] = useState(() => {
-    const initial = {};
-    for (let i = 1; i <= 5; i++) {
-      initial[i] = selectedExercises.reduce((acc, exercise) => ({
-        ...acc,
-        [exercise]: ''
-      }), {});
-    }
-    return initial;
-  });
+  // 초기 상태를 1차수만 가지도록 수정
+  const [savedExerciseCounts, setSavedExerciseCounts] = useState(() => ({
+    1: selectedExercises.reduce((acc, exercise) => ({
+      ...acc,
+      [exercise]: ''
+    }), {})
+  }));
   
-  // 현재 입력 중인 운동 횟수
+  // 현재 입력 중인 운동 횟수 (1차수의 초기값)
   const [currentExerciseCounts, setCurrentExerciseCounts] = useState(
     selectedExercises.reduce((acc, exercise) => ({
       ...acc,
@@ -83,11 +84,30 @@ const ExerciseDetailPage = () => {
     }), {})
   );
 
+  // 차수별 입력 완료 상태를 관리하는 state 추가
+  const [completedOrders, setCompletedOrders] = useState({});
+
+  // handleCountChange 함수 수정
   const handleCountChange = (exercise, value) => {
-    setCurrentExerciseCounts(prev => ({
-      ...prev,
-      [exercise]: value
-    }));
+    setCurrentExerciseCounts(prev => {
+      const newCounts = {
+        ...prev,
+        [exercise]: value
+      };
+      
+      // 현재 차수의 모든 운동이 입력되었는지 확인
+      const isCompleted = selectedExercises.every(ex => 
+        newCounts[ex] !== '' && newCounts[ex] !== '0'
+      );
+      
+      // 완료 상태 업데이트
+      setCompletedOrders(prev => ({
+        ...prev,
+        [currentOrder]: isCompleted
+      }));
+      
+      return newCounts;
+    });
   };
 
   const handleExerciseCountChange = (e) => {
@@ -122,7 +142,7 @@ const ExerciseDetailPage = () => {
   };
 
   // 운동차수 상태 추가
-  const [currentOrder, setCurrentOrder] = useState('');
+  const [currentOrder, setCurrentOrder] = useState('1');
   
   // 각 차수별 운동 횟수를 저장할 상태
   const [orderExerciseCounts, setOrderExerciseCounts] = useState({});
@@ -156,7 +176,15 @@ const ExerciseDetailPage = () => {
 
   // 운동차수 추가 핸들러
   const handleAddOrder = () => {
-    setMaxExerciseCount(prev => prev + 1);
+    const newCount = maxExerciseCount + 1;
+    setMaxExerciseCount(newCount);
+    setSavedExerciseCounts(prev => ({
+      ...prev,
+      [newCount]: selectedExercises.reduce((acc, exercise) => ({
+        ...acc,
+        [exercise]: ''
+      }), {})
+    }));
   };
 
   // 다음으로 버튼 핸들러 수정
@@ -167,12 +195,13 @@ const ExerciseDetailPage = () => {
       [currentOrder]: { ...currentExerciseCounts }
     };
 
-    navigate('/exercise-chart', {
+    navigate('/exercise/chart', {
       state: {
         selectedStudent,
         selectedExercises,
         selectedDate,
-        exerciseOrders: finalOrderCounts
+        exerciseOrders: finalOrderCounts,
+        isViewMode: false
       }
     });
   };
@@ -202,7 +231,7 @@ const ExerciseDetailPage = () => {
               {selectedStudent?.name}
               <StudentGrade>{selectedStudent?.grade}학년</StudentGrade>
             </StudentName>
-            <StudentClass>{selectedStudent?.class}반</StudentClass>
+            <StudentClass>{selectedStudent?.school_type}반</StudentClass>
           </StudentInfo>
         </StudentProfileCard>
 
@@ -219,14 +248,15 @@ const ExerciseDetailPage = () => {
           </FormGroup>
 
           <OrderSelectWrapper>
+            <Label>운동 차수 *</Label>
             <StyledOrderSelect
               value={currentOrder}
               onChange={handleOrderChange}
+              required
             >
-              <option value="">운동차수 선택</option>
               {Array.from({ length: maxExerciseCount }, (_, i) => i + 1).map((num) => (
                 <option key={num} value={num}>
-                  {num}차
+                  {num}차 {completedOrders[num] ? '✓' : ''}
                 </option>
               ))}
             </StyledOrderSelect>
@@ -237,7 +267,7 @@ const ExerciseDetailPage = () => {
         </Form>
 
         <ExerciseSection>
-          <ExerciseSectionTitle>운동 종목</ExerciseSectionTitle>
+          <ExerciseSectionTitle>{currentOrder}차</ExerciseSectionTitle>
           <ExerciseList>
             {selectedExercises.map((exercise, index) => (
               <ExerciseItem 
@@ -264,7 +294,12 @@ const ExerciseDetailPage = () => {
         </ExerciseSection>
 
         <ButtonContainer>
-          <NextButton onClick={handleNext}>다음으로</NextButton>
+          <NextButton 
+            onClick={handleNext}
+            disabled={!currentOrder} // 차수 선택이 안 되어있으면 비활성화
+          >
+            다음으로
+          </NextButton>
         </ButtonContainer>
       </Container>
     </>

@@ -1,35 +1,28 @@
 import React from 'react';
-import {
-  StudentListWrapper,
-  StudentCardWrapper,
-  StudentImage,
-  StudentInfo,
-  StudentName,
-  StudentGrade,
-} from './StudentSelect.styles';
+import { StudentListWrapper } from './StudentSelect.styles';
+import StudentCard from './StudentCard';
 import defaultProfile from '../../../assets/images/person.jpg';
 
-const StudentList = ({ students, onStudentSelect, selectedStudent }) => {
+const StudentList = ({ students, onStudentSelect, onStudentDelete, selectedStudent }) => {
+  const handleStudentClick = (student) => {
+    console.log('Clicked student:', student); // 디버깅용
+    console.log('Current selectedStudent:', selectedStudent); // 디버깅용
+    onStudentSelect(student);
+  };
+
   return (
     <StudentListWrapper>
       {students.map((student) => (
-        <StudentCardWrapper 
+        <StudentCard
           key={student.id}
-          onClick={() => onStudentSelect(student)}
-          $isSelected={selectedStudent?.id === student.id}
-        >
-          <StudentImage 
-            src={student.profileImage || defaultProfile} 
-            alt={student.name}
-            onError={(e) => {
-              e.target.src = defaultProfile;
-            }}
-          />
-          <StudentInfo>
-            <StudentName>{student.name}</StudentName>
-            <StudentGrade>{student.grade}학년 {student.class}반</StudentGrade>
-          </StudentInfo>
-        </StudentCardWrapper>
+          student={{
+            ...student,
+            profileImage: student.profileImage || defaultProfile
+          }}
+          isSelected={selectedStudent?.id === student.id}
+          onSelect={handleStudentClick}
+          onDelete={onStudentDelete}
+        />
       ))}
     </StudentListWrapper>
   );

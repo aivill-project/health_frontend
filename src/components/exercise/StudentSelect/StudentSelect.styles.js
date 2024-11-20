@@ -1,10 +1,27 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+import { createGlobalStyle } from 'styled-components';
+
+export const GlobalStyle = createGlobalStyle`
+  @keyframes selectedPulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(34, 139, 230, 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(34, 139, 230, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(34, 139, 230, 0);
+    }
+  }
+`;
 
 export const Container = styled.div`
-  padding: 20px;
-  max-width: 1200px;
+  position: relative;
+  width: 100%;
+  max-width: 800px;
   margin: 0 auto;
-  margin-bottom: 80px;
+  padding: 20px;
+  min-height: 100vh;
 `;
 
 export const Title = styled.h2`
@@ -18,52 +35,70 @@ export const Title = styled.h2`
 
 export const StudentListWrapper = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 20px;
-  padding: 20px;
-  margin-bottom: 80px;
+  padding: 16px;
+  margin-bottom: 60px;
 `;
 
 export const StudentCardWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 16px;
-  background-color: white;
+  position: relative;
+  padding: 20px;
+  background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: all 0.2s;
-  border: 2px solid ${props => props.$isSelected ? '#339af0' : 'transparent'};
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 2px solid transparent;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
+
+  ${({ $isSelected }) => $isSelected && css`
+    background-color: #e7f5ff;
+    border-color: #228be6;
+    animation: selectedPulse 2s infinite;
+  `}
 `;
 
 export const StudentImage = styled.img`
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  margin-right: 12px;
+  margin-bottom: 12px;
   object-fit: cover;
+  background-color: #f1f3f5;
 `;
 
 export const StudentInfo = styled.div`
-  display: flex;
-  flex-direction: column;
+  text-align: center;
+  width: 100%;
 `;
 
-export const StudentName = styled.span`
+export const StudentName = styled.div`
+  font-weight: 600;
   font-size: 16px;
-  font-weight: 500;
-  color: #212529;
   margin-bottom: 4px;
+  color: #343a40;
+  transition: color 0.3s ease;
+
+  ${({ $isSelected }) => $isSelected && css`
+    color: #228be6;
+  `}
 `;
 
-export const StudentGrade = styled.span`
+export const StudentGrade = styled.div`
   font-size: 14px;
   color: #868e96;
+  transition: color 0.3s ease;
+
+  ${({ $isSelected }) => $isSelected && css`
+    color: #1971c2;
+  `}
 `;
 
 export const ListHeader = styled.div`
@@ -165,3 +200,47 @@ export const NextButtonStyled = styled.button`
     transform: translateX(4px);
   }
 `;
+
+export const LoadingSpinner = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: #868e96;
+  font-size: 1rem;
+`;
+
+export const ErrorMessage = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: #fa5252;
+  font-size: 1rem;
+  text-align: center;
+  padding: 0 20px;
+`;
+
+export const DeleteButton = styled.button`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border-radius: 50%;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #868e96;
+  z-index: 1;
+  
+  &:hover {
+    background-color: #fa5252;
+    border-color: #fa5252;
+    color: white;
+  }
+`

@@ -67,7 +67,9 @@ const ExerciseListPage = () => {
       return;
     }
 
-    navigate('/student-select', {
+    console.log('Selected exercises:', selectedExercises); // 디버깅용
+
+    navigate('/student-select', {  // 경로 수정
       state: { 
         selectedExercises: selectedExercises
       }

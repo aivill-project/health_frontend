@@ -269,4 +269,48 @@ export const ExerciseValue = styled.div`
   font-size: 18px;
   font-weight: 600;
   color: #339af0;
+`;
+
+export const ButtonContainer = styled.div`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  background: linear-gradient(to top, rgba(255, 255, 255, 1) 90%, rgba(255, 255, 255, 0));
+  display: flex;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+export const SaveButton = styled.button`
+  width: 100%;
+  max-width: 768px;
+  padding: 16px 32px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #228be6 0%, #1971c2 100%);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(34, 139, 230, 0.3);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(34, 139, 230, 0.4);
+    background: linear-gradient(135deg, #1c7ed6 0%, #1864ab 100%);
+  }
+
+  &:disabled {
+    background: linear-gradient(135deg, #dee2e6 0%, #adb5bd 100%);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
 `; 

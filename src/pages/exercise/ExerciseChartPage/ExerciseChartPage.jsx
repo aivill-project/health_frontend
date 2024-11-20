@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '../../../components/common/Header/Header';
 import {
   Container,
@@ -22,7 +22,9 @@ import {
   ExerciseDetail,
   ExerciseLabel,
   ExerciseValue,
-  BackButton
+  BackButton,
+  ButtonContainer,
+  SaveButton
 } from '../../../components/exercise/ExerciseChart/ExerciseChart.styles';
 import defaultProfile from '../../../assets/images/person.jpg';
 import { 
@@ -35,16 +37,63 @@ import {
   Legend, 
   ResponsiveContainer 
 } from 'recharts';
+import { useMutation } from '@tanstack/react-query';
+import { saveExerciseRecord } from '../../../services/exerciseRecordService';
 
 const ExerciseChartPage = () => {
+  const navigate = useNavigate();
   const location = useLocation();
-  const { selectedStudent, selectedExercises, selectedDate, exerciseOrders } = location.state || {};
+  const { 
+    selectedStudent, 
+    selectedExercises, 
+    selectedDate, 
+    exerciseOrders,
+    isViewMode = true 
+  } = location.state || {};
+
+  console.log('Received data in chart page:', {
+    selectedExercises,
+    exerciseOrders
+  });
+
+  // 데이터 구조 확인
+  console.log('Received chart data:', {
+    selectedStudent,
+    selectedExercises,
+    selectedDate,
+    exerciseOrders,
+    isViewMode
+  });
 
   // 차트 데이터 가공
   const chartData = Object.entries(exerciseOrders).map(([order, counts]) => ({
     name: `${order}차`,
     ...counts
   }));
+
+  const saveRecordMutation = useMutation({
+    mutationFn: saveExerciseRecord,
+    onSuccess: () => {
+      alert('운동 기록이 저장되었습니다.');
+      navigate('/exercise/records', {
+        state: { selectedStudent },
+        replace: true
+      });
+    },
+    onError: (error) => {
+      alert('저장 실패: ' + error.message);
+    }
+  });
+
+  const handleSaveRecord = () => {
+    const recordData = {
+      student_id: selectedStudent.student_id,
+      date: selectedDate,
+      exercises: selectedExercises,
+      exercise_orders: exerciseOrders
+    };
+    saveRecordMutation.mutate(recordData);
+  };
 
   return (
     <>
@@ -60,7 +109,7 @@ const ExerciseChartPage = () => {
           />
           <StudentInfo>
             <StudentName>{selectedStudent?.name}</StudentName>
-            <StudentClass>{selectedStudent?.grade}학년 {selectedStudent?.class}반</StudentClass>
+            <StudentClass>{selectedStudent?.grade}학년 {selectedStudent?.school_type}반</StudentClass>
           </StudentInfo>
         </StudentProfile>
 
@@ -167,6 +216,14 @@ const ExerciseChartPage = () => {
             </Table>
           </TableContainer>
         </ContentWrapper>
+
+        {!isViewMode && (
+          <ButtonContainer>
+            <SaveButton onClick={handleSaveRecord} disabled={saveRecordMutation.isPending}>
+              {saveRecordMutation.isPending ? '저장 중...' : '운동 기록 저장'}
+            </SaveButton>
+          </ButtonContainer>
+        )}
       </Container>
     </>
   );

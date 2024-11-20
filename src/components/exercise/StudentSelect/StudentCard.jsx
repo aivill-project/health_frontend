@@ -1,27 +1,46 @@
 import React from 'react';
+import CloseIcon from '@mui/icons-material/Close';
 import {
   StudentCardWrapper,
   StudentImage,
   StudentInfo,
   StudentName,
-  StudentGrade
+  StudentGrade,
+  DeleteButton,
+  GlobalStyle
 } from './StudentSelect.styles';
 
-const StudentCard = ({ student, isSelected, onSelect }) => {
+const StudentCard = ({ student, isSelected, onSelect, onDelete }) => {
+  const handleDelete = (e) => {
+    e.stopPropagation();
+    onDelete(student);
+  };
+
   return (
-    <StudentCardWrapper
-      onClick={() => onSelect(student)}
-      $isSelected={isSelected}
-    >
-      <StudentImage 
-        src={student.profileImage} 
-        alt={student.name} 
-      />
-      <StudentInfo>
-        <StudentName>{student.name}</StudentName>
-        <StudentGrade>{student.grade}학년 {student.class}반</StudentGrade>
-      </StudentInfo>
-    </StudentCardWrapper>
+    <>
+      <GlobalStyle />
+      <StudentCardWrapper
+        onClick={() => onSelect(student)}
+        $isSelected={isSelected}
+      >
+        <DeleteButton 
+          onClick={handleDelete}
+          aria-label="학생 삭제"
+        >
+          <CloseIcon sx={{ fontSize: 16 }} />
+        </DeleteButton>
+        <StudentImage 
+          src={student.profileImage} 
+          alt={student.name} 
+        />
+        <StudentInfo>
+          <StudentName $isSelected={isSelected}>{student.name}</StudentName>
+          <StudentGrade $isSelected={isSelected}>
+            {student.school_type}반 {student.grade}학년
+          </StudentGrade>
+        </StudentInfo>
+      </StudentCardWrapper>
+    </>
   );
 };
 
