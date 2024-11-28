@@ -1,13 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import MobileContainer from '../../components/common/MobileContainer/MobileContainer';
 
 const MainPage = () => {
   const navigate = useNavigate();
 
   return (
-    <Container>
-      <Title>태권월드 운동 기록 📝</Title>
+    <MobileContainer>
+      <Container>
+        <Title>태권월드 운동 기록 📝</Title>
       
       <ContentSection>
         <Heading> 사용 방법 ❔ </Heading>
@@ -54,53 +56,56 @@ const MainPage = () => {
           </ViewRecordsButton>
         </ButtonGroup>
       </ContentSection>
-    </Container>
+      </Container>
+    </MobileContainer>
   );
 };
 
 const Container = styled.div`
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
+  height: 100%;
+  overflow-y: auto;
 `;
 
 const Title = styled.h1`
   text-align: center;
   color: #333;
-  margin-bottom: 2rem;
-  font-size: 2.5rem;
+  margin: 1rem 0;
+  font-size: 1.8rem;
+  word-break: keep-all;
 `;
 
 const ContentSection = styled.section`
   background: #fff;
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 `;
 
 const Heading = styled.h2`
   color: #444;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.2rem;
+  font-size: 1.3rem;
 `;
 
 const GuideBox = styled.div`
   display: grid;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 `;
 
 const GuideItem = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem;
+  gap: 0.8rem;
+  padding: 0.8rem;
   background: #f8f9fa;
   border-radius: 8px;
 `;
 
 const StepNumber = styled.div`
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   background: #007bff;
   color: white;
   border-radius: 50%;
@@ -108,30 +113,40 @@ const StepNumber = styled.div`
   align-items: center;
   justify-content: center;
   font-weight: bold;
+  font-size: 0.9rem;
+  flex-shrink: 0;
 `;
 
 const StepText = styled.div`
   strong {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
     color: #333;
+    font-size: 0.95rem;
   }
   
   p {
     color: #666;
     margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
   }
 `;
 
+const ButtonGroup = styled.div`
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+`;
+
 const StartButton = styled.button`
-  display: block;
   width: 100%;
-  padding: 1rem;
+  padding: 0.9rem;
   background: #007bff;
   color: white;
   border: none;
   border-radius: 5px;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
   transition: background 0.2s;
@@ -139,11 +154,6 @@ const StartButton = styled.button`
   &:hover {
     background: #0056b3;
   }
-`;
-
-const ButtonGroup = styled.div`
-  display: grid;
-  gap: 1rem;
 `;
 
 const ViewRecordsButton = styled(StartButton)`

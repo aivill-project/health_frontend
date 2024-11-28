@@ -4,16 +4,17 @@ import { useQuery } from '@tanstack/react-query';
 import { getAllStudentRecords, getRecordDetails } from '../../../services/exerciseRecordService';
 import { fetchStudents } from '../../../services/studentService';
 import Header from '../../../components/common/Header/Header';
+import MobileContainer from '../../../components/common/MobileContainer/MobileContainer';
 import {
   Container,
   PageLayout,
   StudentListSection,
-  RecordsSection,
   StudentList,
   StudentItem,
   StudentInfo,
   StudentName,
   StudentGrade,
+  RecordsSection,
   RecordsList,
   RecordItem,
   RecordSummary,
@@ -131,10 +132,11 @@ const ExerciseRecordsPage = () => {
   return (
     <>
       <Header title="운동 기록 조회" />
-      <Container>
+      <MobileContainer>
+        <Container>
         <PageLayout>
           <StudentListSection>
-            <h2>학생 목록</h2>
+            <h2>학생 선택</h2>
             <StudentList>
               {students?.map((student) => (
                 <StudentItem
@@ -143,9 +145,11 @@ const ExerciseRecordsPage = () => {
                   onClick={() => handleStudentClick(student)}
                 >
                   <StudentInfo>
-                    <StudentName>{student.name}</StudentName>
-                    <StudentGrade>
-                      {student.grade}학년 ({student.school_type}반)
+                    <StudentName $isSelected={selectedStudent?.id === student.id}>
+                      {student.name}
+                    </StudentName>
+                    <StudentGrade $isSelected={selectedStudent?.id === student.id}>
+                      {student.grade}학년 {student.school_type}반
                     </StudentGrade>
                   </StudentInfo>
                 </StudentItem>
@@ -259,6 +263,7 @@ const ExerciseRecordsPage = () => {
           </RecordsSection>
         </PageLayout>
       </Container>
+    </MobileContainer>
     </>
   );
 };

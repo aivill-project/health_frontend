@@ -7,20 +7,23 @@ export const Container = styled.div`
 `;
 
 export const PageLayout = styled.div`
-  display: grid;
-  grid-template-columns: 300px 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 20px;
-  min-height: calc(100vh - 100px);
+  width: 100%;
+  padding: 16px;
 `;
 
-export const StudentListSection = styled.div`
+export const StudentListSection = styled.section`
+  width: 100%;
   background: white;
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 `;
 
-export const RecordsSection = styled.div`
+export const RecordsSection = styled.section`
+  width: 100%;
   background: white;
   border-radius: 8px;
   padding: 20px;

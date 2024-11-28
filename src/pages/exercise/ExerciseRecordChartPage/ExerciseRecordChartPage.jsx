@@ -3,18 +3,20 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { getExerciseAnalysis } from '../../../services/exerciseAnalysisService';
 import Header from '../../../components/common/Header/Header';
 import styled from 'styled-components';
+import { ClimbingBoxLoader } from 'react-spinners';
+import MobileContainer from '../../../components/common/MobileContainer/MobileContainer';
 
 const Container = styled.div`
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: 16px;
+  flex: 1;
+  overflow-y: auto;
 `;
 
 const ChartSection = styled.div`
   background: white;
   border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
+  padding: 12px;
+  margin-bottom: 12px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 `;
 
@@ -34,8 +36,9 @@ const ExerciseList = styled.ul`
 const ExerciseItem = styled.li`
   display: flex;
   align-items: center;
-  padding: 15px 0;
+  padding: 12px 0;
   border-bottom: 1px solid #eee;
+  font-size: 14px;
 
   &:last-child {
     border-bottom: none;
@@ -55,10 +58,10 @@ const ExerciseCount = styled.div`
 
 const CountBar = styled.div`
   width: ${props => props.$percentage}%;
-  height: 24px;
+  height: 20px;
   background-color: #bbdefb;
-  border-radius: 12px;
-  margin-right: 10px;
+  border-radius: 10px;
+  margin-right: 8px;
   transition: width 0.3s ease;
   min-width: 20px;
 `;
@@ -73,8 +76,8 @@ const CountNumber = styled.span`
 const AnalysisSection = styled.div`
   background: white;
   border-radius: 8px;
-  padding: 20px;
-  margin-top: 20px;
+  padding: 16px;
+  margin-top: 16px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 `;
 
@@ -104,22 +107,33 @@ const AnalysisContent = styled.div`
   }
 `;
 
-const LoadingSpinner = styled.div`
-  text-align: center;
-  padding: 20px;
+const LoadingContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  gap: 16px;
+`;
+
+const LoadingText = styled.div`
   color: #666;
+  font-size: 1.1em;
+  margin-top: 20px;
+  text-align: center;
 `;
 
 const AnalysisButton = styled.button`
+  width: 100%;
   background-color: #1976d2;
   color: white;
   border: none;
   border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 1rem;
+  padding: 12px 16px;
+  font-size: 14px;
   cursor: pointer;
   transition: background-color 0.2s;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 
   &:hover {
     background-color: #1565c0;
@@ -144,68 +158,6 @@ const ExerciseRecordChartPage = () => {
     created_at,
     recordId
   } = location.state || {};
-
-  useEffect(() => {
-    const fetchAnalysis = async () => {
-      if (!exerciseOrders || !selectedStudent) return;
-
-      try {
-        setIsLoading(true);
-        // API 호출을 위한 데이터 준비
-        const exerciseHistory = [{
-          date: created_at,
-          exercise_orders: exerciseOrders
-        }];
-
-        const recommendation = await getExerciseAnalysis(
-          exerciseHistory,
-          selectedStudent
-        );
-        
-        setAnalysis(recommendation);
-      } catch (error) {
-        console.error('운동 분석 중 오류:', error);
-        setAnalysis('운동 분석을 불러오는 중 오류가 발생했습니다.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAnalysis();
-  }, [exerciseOrders, selectedStudent, created_at]);
-
-  // 데이터 유효성 검사
-  if (!exerciseOrders || !selectedStudent) {
-    return (
-      <>
-        <Header 
-          title="운동 기록 차트"
-          onBack={() => navigate(-1)}
-        />
-        <Container>
-          <div>데이터를 불러올 수 없습니다.</div>
-        </Container>
-      </>
-    );
-  }
-
-  // 각 운동 차수별 최대 횟수 계산
-  const getMaxCount = (exercises) => {
-    return Math.max(...Object.values(exercises).map(count => Number(count)));
-  };
-
-  // 날짜 시간 포맷팅
-  const formatDateTime = (dateTimeStr) => {
-    const date = new Date(dateTimeStr);
-    return date.toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    }).replace(/\. /g, '.').replace(/:/g, '.');
-  };
 
   const handleAnalysisClick = async () => {
     if (!exerciseOrders || !selectedStudent) return;
@@ -238,12 +190,51 @@ const ExerciseRecordChartPage = () => {
     }
   };
 
+  // 데이터 유효성 검사
+  if (!exerciseOrders || !selectedStudent) {
+    return (
+      <>
+        <Header 
+          title="운동 기록 차트"
+          onBack={() => navigate(-1)}
+        />
+        <Container>
+          <div>데이터를 불러올 수 없습니다.</div>
+        </Container>
+      </>
+    );
+  }
+
+  // 각 운동 차수별 최대 횟수 계산
+  const getMaxCount = (exercises) => {
+    return Math.max(...Object.values(exercises).map(count => Number(count)));
+  };
+
+  // 날짜 시간 포맷팅
+  const formatDateTime = (dateTimeStr) => {
+    const date = new Date(dateTimeStr);
+    return date.toLocaleString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      // hour: '2-digit',
+      // minute: '2-digit',
+      hour12: false
+    }).replace(/\. /g, '.').replace(/:/g, '.');
+  };
+
   return (
-    <>
+    <> 
       <Header 
-        title={`${selectedStudent?.name} - ${formatDateTime(created_at)} 운동 기록`}
+        title={`${selectedStudent?.name}의 ${formatDateTime(created_at)} 운동 기록 차트`}
         onBack={() => navigate(-1)}
       />
+      <MobileContainer>
+        {/* <Header 
+        title={`${selectedStudent?.name} - ${formatDateTime(created_at)} 운동 기록`}
+        onBack={() => navigate(-1)}
+      /> */}
+
       <Container>
         {Object.entries(exerciseOrders).map(([order, exercises]) => {
           const maxCount = getMaxCount(exercises);
@@ -286,10 +277,17 @@ const ExerciseRecordChartPage = () => {
           
           {showAnalysis && (
             isLoading ? (
-              <LoadingSpinner>
-                <div>AI 트레이너가 운동을 분석하고 있습니다...</div>
-                <div>잠시만 기다려주세요.</div>
-              </LoadingSpinner>
+              <LoadingContainer>
+                <ClimbingBoxLoader 
+                  color="#1976d2"
+                  size={15}
+                  loading={isLoading}
+                />
+                <LoadingText>
+                  <div>AI 트레이너가 운동을 분석하고 있습니다...</div>
+                  <div>잠시만 기다려주세요.</div>
+                </LoadingText>
+              </LoadingContainer>
             ) : (
               <AnalysisContent>
                 {analysis}
@@ -298,6 +296,7 @@ const ExerciseRecordChartPage = () => {
           )}
         </AnalysisSection>
       </Container>
+    </MobileContainer>
     </>
   );
 };
